@@ -24,24 +24,27 @@ The backend provides a unified API that mediates between:
 - **Environment:** dotenv for secrets
 - **Package Manager:** pnpm (recommended) or npm
 
-## Project Structure (tbd)
+## Project Structure
 
 ```txt
 rush-backend/
 │
 ├── src/
-│   ├── index.ts           # entrypoint
-│   ├── routes/            # route handlers
-│   ├── services/          # business logic
-│   ├── utils/             # helpers
-│   └── config/            # env, supabase, prisma
+│   ├── index.ts            # Express bootstrap
+│   ├── routes/             # HTTP endpoints
+│   ├── services/           # business logic helpers
+│   ├── utils/              # shared helpers (logger, etc.)
+│   └── config/             # env loaders, supabase bindings
 │
-├── prisma/                # schema.prisma if ORM used
-│
-├── .env                   # placeholder env vars
+├── prisma/
+│   └── schema.prisma       # Supabase/Prisma mapping
+├── tests/
+│   └── fixtures/           # contract + mock data
+├── .env.example            # document required env vars
 ├── .gitignore
 ├── package.json
 ├── tsconfig.json
+├── pnpm-lock.yaml
 └── README.md
 ```
 
@@ -51,3 +54,12 @@ rush-backend/
 - Simplify Supabase queries via backend routes.
 - Standardize auth, roles, and validation logic.
 - Prepare for both Expo (mobile) and Next.js (web) clients.
+
+## Getting Started
+
+1. Install dependencies (uses pnpm by default): `pnpm install`
+2. Copy `.env.example` to `.env` and populate Supabase + port values.
+3. Run the dev server: `pnpm dev`
+4. Build for production: `pnpm build && pnpm start`
+
+The API exposes a `GET /api/health` route that clients and monitors can use to confirm the service is running. Add additional routes under `src/routes/*` and corresponding business logic under `src/services/*` following the module co-location guideline in `AGENTS.md`.
