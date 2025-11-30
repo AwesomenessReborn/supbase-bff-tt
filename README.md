@@ -38,8 +38,13 @@ rush-backend/
 │
 ├── prisma/
 │   └── schema.prisma       # Supabase/Prisma mapping
+│
 ├── tests/
 │   └── fixtures/           # contract + mock data
+│
+├── sql/
+│   └── migrations/         # contract + mock data
+│
 ├── .env.example            # document required env vars
 ├── .gitignore
 ├── package.json
