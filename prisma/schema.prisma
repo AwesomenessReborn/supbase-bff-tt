@@ -1,0 +1,9 @@
+// Placeholder Prisma schema. Extend with Supabase tables when ready.
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
