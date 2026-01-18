@@ -8,7 +8,7 @@ This is the **Backend-for-Frontend (BFF)** service for the **Rush App** — a cr
 - Mobile frontend (React Native + Expo) for members and candidates
 - Web frontend (Next.js) for admins and rush chairs
 - Supabase backend (auth + PostgreSQL database)
-- Internal business logic (attendance, votes, dues, feedback)
+- Internal business logic (events, attendance, votes, feedback, interviews, dues)
 
 ## Technology Stack Decision
 
@@ -47,6 +47,7 @@ Copy `.env.example` to `.env` and populate:
 - `SUPABASE_URL` - Supabase project URL
 - `SUPABASE_ANON_KEY` - Public anonymous key
 - `SUPABASE_SERVICE_ROLE_KEY` - Service role key (never commit!)
+- `DATABASE_URL` - PostgreSQL connection string for Prisma (get from Supabase project settings)
 
 ## Architecture
 
@@ -127,15 +128,126 @@ src/
 ## Database & Prisma
 
 ### Current State
-- Prisma schema exists at `prisma/schema.prisma` (currently placeholder)
-- SQL migrations stored in `sql/migrations/` directory
-- Database: PostgreSQL via Supabase
+- **Database:** PostgreSQL via Supabase
+- **ORM:** Prisma for type-safe database access
+- **Schema Documentation:** See `docs/database-schema.md` for complete database design
+- **Migrations:** SQL migration files in `sql/migrations/` directory
+- **Migration Guide:** See `sql/migrations/README.md` and `sql/MIGRATION_CHECKLIST.md`
+
+### Database Schema (v1)
+
+The database consists of 7 core tables for rush management:
+
+1. **users** - User profiles linked to Supabase Auth (roles: ADMIN, ACTIVE, PLEDGE, RUSHEE)
+2. **events** - Rush events (dinners, smokers, interviews, meetings)
+3. **attendance** - Event attendance tracking with optional RSVP support
+4. **votes** - Secret ballot voting on candidates with multiple rounds
+5. **feedback** - Written feedback and ratings (1-5 stars) on candidates
+6. **dues_payments** - Financial tracking (statuses: PAID, PARTIAL, NOT_PAID, OVERDUE, WAIVED)
+7. **interviews** - Interview content, assessments, and recommendations (JSONB for flexible Q&A)
+
+**Additional Features:**
+- `candidate_stage` field on users tracks rushee progression (INITIAL → FIRST_ROUND → BID_EXTENDED → etc.)
+- Row Level Security (RLS) enabled on all tables
+- Automated `updated_at` triggers on all tables
+- Comprehensive indexes for performance
+
+### Available Migrations
+
+All migrations are ready to run in `sql/migrations/`:
+
+- ✅ `001_create_users_table.sql` - User profiles and auth
+- ✅ `002_create_events_table.sql` - Rush events
+- ✅ `003_create_attendance_table.sql` - Attendance tracking
+- ✅ `004_create_votes_table.sql` - Voting system
+- ✅ `005_create_feedback_table.sql` - Member feedback
+- ✅ `006_create_dues_payments_table.sql` - Financial tracking
+- ✅ `007_create_interviews_table.sql` - Interview assessments
+- ✅ `008_add_candidate_stage_to_users.sql` - Candidate progression tracking
+
+**To run migrations:** Follow the step-by-step guide in `sql/MIGRATION_CHECKLIST.md`
+
+### Setting Up Prisma
+
+After running database migrations in Supabase:
+
+```bash
+# 1. Install Prisma dependencies
+pnpm add @prisma/client
+pnpm add -D prisma
+
+# 2. Ensure DATABASE_URL is set in .env
+# DATABASE_URL="postgresql://postgres:[PASSWORD]@db.[PROJECT-REF].supabase.co:5432/postgres"
+
+# 3. Pull schema from Supabase (introspects database)
+npx prisma db pull
+
+# 4. Generate Prisma Client with TypeScript types
+npx prisma generate
+
+# 5. Verify types are available
+# You should now have autocomplete for:
+# - prisma.users
+# - prisma.events
+# - prisma.attendance
+# - prisma.votes
+# - prisma.feedback
+# - prisma.dues_payments
+# - prisma.interviews
+```
 
 ### When Adding Database Features
-- Extend Prisma schema to map Supabase tables
-- Create migrations in `sql/migrations/` with sequential numbering
-- Reference migration IDs in PR descriptions
-- Use Prisma Client for type-safe database access
+
+1. **For new tables:** Create new migration file with sequential numbering (e.g., `009_create_xyz_table.sql`)
+2. **For schema changes:** Use `ALTER TABLE` in a new migration file
+3. **Update Prisma:** Run `npx prisma db pull` to sync schema
+4. **Regenerate client:** Run `npx prisma generate` to update TypeScript types
+5. **Reference migration ID** in PR descriptions
+6. **Test thoroughly** before merging database changes
+
+## v1 Core Features (Implementation Roadmap)
+
+These features are prioritized for the initial release:
+
+### Phase 1: Foundation (Weeks 1-2)
+- ✅ Database migrations (all 8 migrations created)
+- [ ] Supabase SDK integration (`src/config/supabase.ts`)
+- [ ] Authentication middleware (`src/middleware/auth.ts`)
+- [ ] Prisma Client setup
+- [ ] Test framework configuration (Jest + Supertest)
+
+### Phase 2: Events & Attendance (Weeks 2-3)
+- [ ] Events API (`POST /api/events`, `GET /api/events`, `GET /api/events/:id`, `PATCH /api/events/:id`)
+- [ ] Attendance API (`POST /api/attendance`, `GET /api/attendance/event/:eventId`, `GET /api/attendance/user/:userId`)
+- [ ] Service layer for events and attendance
+- [ ] Tests for events and attendance routes
+
+### Phase 3: Voting System (Weeks 3-4)
+- [ ] Voting API (`POST /api/votes/ballot`, `GET /api/votes/candidate/:candidateId`, `GET /api/votes/results/:eventId`)
+- [ ] Vote validation (prevent duplicate votes, enforce active member voting)
+- [ ] Aggregated results queries (respect anonymity)
+- [ ] Tests for voting routes
+
+### Phase 4: Feedback & Interviews (Weeks 4-5) ⭐ **Critical for v1**
+- [ ] Feedback API (`POST /api/feedback`, `GET /api/feedback/candidate/:candidateId`)
+- [ ] Interviews API (`POST /api/interviews`, `GET /api/interviews/candidate/:candidateId`, `GET /api/interviews/:id`)
+- [ ] Support for JSONB interview Q&A structure
+- [ ] Tests for feedback and interviews
+
+### Phase 5: Dues & Admin Features (Weeks 5-6)
+- [ ] Dues API (`POST /api/dues/payment`, `GET /api/dues/user/:userId`, `GET /api/dues/outstanding`)
+- [ ] Admin dashboard stats (`GET /api/admin/stats`)
+- [ ] Candidate stage tracking (`PATCH /api/users/:id/stage`)
+- [ ] Tests for dues and admin routes
+
+### Phase 6: Polish & Deploy (Weeks 6-7)
+- [ ] Error handling middleware
+- [ ] Input validation (Zod schemas)
+- [ ] Rate limiting
+- [ ] API documentation
+- [ ] Production deployment (Render/Railway/Vercel)
+
+**See `docs/database-schema.md` for detailed feature specifications and business rules.**
 
 ## Security & Environment
 
@@ -170,24 +282,51 @@ Every PR should include:
 ## Adding New Features
 
 ### Checklist for New Endpoints
-1. Create service module: `src/services/{feature}/index.ts`
-2. Create route registration: `src/routes/{feature}.ts`
-3. Import and register in `src/routes/index.ts`
-4. Add tests in `src/routes/__tests__/{feature}.spec.ts`
-5. Document request/response DTOs with JSDoc
-6. Update Prisma schema if database changes needed
-7. Run `pnpm lint` and `pnpm test` before committing
+
+1. **Create service module:** `src/services/{feature}/index.ts`
+   - Use Prisma Client for database queries
+   - Implement business logic and validation
+   - Handle errors appropriately
+
+2. **Create route registration:** `src/routes/{feature}.ts`
+   - Use `register{Feature}Routes(router: Router)` pattern
+   - Apply auth middleware for protected routes
+   - Add input validation (Zod schemas recommended)
+
+3. **Register routes:** Import and register in `src/routes/index.ts`
+
+4. **Add tests:** `src/routes/__tests__/{feature}.spec.ts`
+   - Use Jest + Supertest
+   - Mock Prisma Client
+   - Test success and error cases
+
+5. **Document:** Add JSDoc for request/response DTOs
+
+6. **Database changes (if needed):**
+   - Create new migration file in `sql/migrations/`
+   - Run migration in Supabase
+   - Update Prisma schema with `npx prisma db pull`
+   - Regenerate client with `npx prisma generate`
+
+7. **Validate:** Run `pnpm lint` and `pnpm test` before committing
 
 ### Example Route Pattern
+
 ```typescript
 // src/routes/votes.ts
 import { Router } from 'express';
+import { authMiddleware } from '../middleware/auth.js';
 import { submitBallot } from '../services/votes/index.js';
 
 export const registerVotesRoutes = (router: Router): void => {
-  router.post('/votes/ballot', async (req, res) => {
-    const result = await submitBallot(req.body);
-    res.json(result);
+  // Protected route - requires authentication
+  router.post('/votes/ballot', authMiddleware, async (req, res) => {
+    try {
+      const result = await submitBallot(req.body, req.user);
+      res.json(result);
+    } catch (error) {
+      res.status(400).json({ error: error.message });
+    }
   });
 };
 
@@ -195,3 +334,92 @@ export const registerVotesRoutes = (router: Router): void => {
 import { registerVotesRoutes } from './votes.js';
 registerVotesRoutes(router);
 ```
+
+```typescript
+// src/services/votes/index.ts
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+
+export async function submitBallot(data: any, user: any) {
+  // Validate user is ACTIVE member
+  if (user.role !== 'ACTIVE') {
+    throw new Error('Only active members can vote');
+  }
+
+  // Check for duplicate vote
+  const existing = await prisma.votes.findFirst({
+    where: {
+      voter_id: user.id,
+      candidate_id: data.candidate_id,
+      voting_round: data.voting_round,
+    },
+  });
+
+  if (existing) {
+    throw new Error('You have already voted in this round');
+  }
+
+  // Create vote
+  return await prisma.votes.create({
+    data: {
+      voter_id: user.id,
+      candidate_id: data.candidate_id,
+      vote_type: data.vote_type,
+      voting_round: data.voting_round,
+      vote_value: data.vote_value,
+    },
+  });
+}
+```
+
+## Key Documentation Files
+
+- **`CLAUDE.md`** - This file (project guidelines for Claude Code)
+- **`README.md`** - Project overview and getting started
+- **`docs/database-schema.md`** - Complete database schema design with tables, relationships, and business rules
+- **`sql/migrations/README.md`** - How to run database migrations (3 methods)
+- **`sql/MIGRATION_CHECKLIST.md`** - Step-by-step migration execution checklist with verification commands
+- **`reports/architecture-vision.md`** - System architecture, integration patterns, and future microservices strategy
+- **`reports/migration-analysis.md`** - Why we chose Node.js/TypeScript over other languages
+
+## Quick Start for New Developers
+
+1. **Clone and install:**
+   ```bash
+   git clone <repo-url>
+   cd bff
+   pnpm install
+   ```
+
+2. **Set up environment:**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your Supabase credentials
+   ```
+
+3. **Run database migrations:**
+   - Follow `sql/MIGRATION_CHECKLIST.md`
+   - Run all 8 migrations in Supabase SQL Editor
+
+4. **Set up Prisma:**
+   ```bash
+   pnpm add @prisma/client
+   pnpm add -D prisma
+   npx prisma db pull
+   npx prisma generate
+   ```
+
+5. **Start development server:**
+   ```bash
+   pnpm dev
+   # Server runs on http://localhost:4000
+   ```
+
+6. **Verify setup:**
+   ```bash
+   curl http://localhost:4000/api/health
+   # Should return: {"status":"healthy"}
+   ```
+
+7. **Start building features** following the v1 roadmap above!
