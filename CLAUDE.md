@@ -10,6 +10,26 @@ This is the **Backend-for-Frontend (BFF)** service for the **Rush App** — a cr
 - Supabase backend (auth + PostgreSQL database)
 - Internal business logic (attendance, votes, dues, feedback)
 
+## Technology Stack Decision
+
+**Stack:** Node.js + TypeScript + Express.js
+
+This project uses Node.js/TypeScript and will NOT be migrated to other languages (e.g., Go). This decision is intentional and based on architectural integration requirements:
+
+### Key Integration Reasons
+1. **Type Sharing** - TypeScript types are shared across the full stack (mobile React Native, web Next.js, and this BFF). Migrating to another language would break this type safety and require duplicate definitions or code generation.
+
+2. **Supabase Integration** - Supabase provides first-class TypeScript support via `@supabase/supabase-js`. The Node.js ecosystem has mature auth, real-time, and RLS integration that would need to be rebuilt in other languages.
+
+3. **BFF Pattern Fit** - BFFs are I/O-bound (HTTP aggregation, JSON transformation, session management). Node.js's event loop and middleware ecosystem excel at this pattern.
+
+4. **Ecosystem Velocity** - Express.js has battle-tested middleware for auth, validation, rate limiting, and error handling. This enables faster feature development than rebuilding these patterns in other frameworks.
+
+### Future Microservices
+If performance-critical or CPU-intensive services are needed (analytics aggregation, bulk notifications, report generation), those should be built as **separate microservices** in appropriate languages (Go, Rust) that call into or are called by this BFF.
+
+**See `reports/migration-analysis.md` for detailed reasoning and architectural tradeoffs.**
+
 ## Development Commands
 
 ### Essential Commands
@@ -29,6 +49,8 @@ Copy `.env.example` to `.env` and populate:
 - `SUPABASE_SERVICE_ROLE_KEY` - Service role key (never commit!)
 
 ## Architecture
+
+**See `reports/architecture-vision.md` for full system architecture, integration patterns, and future microservices strategy.**
 
 ### Request Flow
 1. Express app (`src/index.ts`) bootstraps with JSON middleware
