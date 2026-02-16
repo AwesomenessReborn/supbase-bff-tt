@@ -1,0 +1,77 @@
+%-----------EDUCATION-----------
+\section{Education}
+  \resumeSubHeadingListStart
+    \resumeSubheading
+      {\textbf{San José State University}}{San Jose, CA}
+      {Bachelor of Science in Computer Engineering}{Expected Dec 2026}
+      \resumeItemListStart
+        \resumeItem{\textbf{Relevant Coursework:} OS, Computer Architecture, C/C++, FPGA, Verilog, Linear Algebra (Julia \& MATLAB), x86 \& MIPS Assembly}
+      \resumeItemListEnd
+  \resumeSubHeadingListEnd
+  
+%-----------EXPERIENCE-----------
+\section{Experience}
+  \resumeSubHeadingListStart
+
+    \resumeSubheading
+      {\textbf{STMicroelectronics}}{Santa Clara, CA}
+      {\textbf{Software \& Algorithm Intern}}{Mar 2025 -- Present}
+      \resumeItemListStart
+        \resumeItem{Developed \textbf{low-level device interfaces} in C/C++ for MEMS sensor hardware, implementing driver-level logic for SPI/I2C register configuration, interrupt handling, and continuous high-frequency data acquisition from IMU sensors (LSM6DSO16IS).}
+        \resumeItem{Implemented \textbf{embedded C/C++ firmware} with real-time processing constraints, configuring on-sensor logic blocks (MLC/FSM/ISPU) and managing continuous data streams under strict latency requirements.}
+        \resumeItem{Built \textbf{protocol-level communication stack} (BLE) managing real-time data transport with sub-100ms latency requirements, handling wireless protocol integration, serialization, and connection management for sensor telemetry.}
+        \resumeItem{Developed \textbf{cross-layer validation infrastructure} bridging native C++ components with higher-level application framework, ensuring functional correctness and data integrity across software stack boundaries.}
+        \resumeItem{Created \textbf{C/Python emulator} for firmware validation, implementing low-level algorithm logic in software to enable rapid testing cycles without hardware dependencies, accelerating development workflow.}
+        \resumeItem{Engineered \textbf{Python tools for automated testing and analysis} of embedded systems, performing regression testing across hardware configurations and generating performance metrics for firmware validation.}
+      \resumeItemListEnd
+
+    \resumeSubheading
+      {\textbf{Spartan Racing (Formula SAE)}}{San Jose, CA}
+      {\textbf{Embedded Systems \& Software Developer}}{Aug 2023 -- Feb 2025}
+      \resumeItemListStart
+        \resumeItem{Implemented \textbf{CAN protocol stack} and telemetry pipeline (CAN bus → InfluxDB → Grafana) for real-time vehicle data acquisition, enabling analysis of battery, motor, and powertrain systems during endurance testing.}
+        \resumeItem{Developed \textbf{Battery Management System firmware} (C, STM32F105) implementing \textbf{low-level SPI driver} for LTC6813 battery monitor IC, managing real-time multi-tasking for concurrent voltage/temperature monitoring, SoC estimation, and CAN protocol integration.}
+        \resumeItem{Designed \textbf{Python hardware-in-the-loop (HIL) test framework} for vehicle systems validation, simulating sensor inputs and CAN traffic to verify safety-critical firmware behavior under race conditions.}
+        \resumeItem{Built \textbf{redundant safety monitoring} in firmware with overvoltage/undervoltage detection, thermal management, and emergency shutdown logic, validated through systematic automated testing.}
+      \resumeItemListEnd
+
+  \resumeSubHeadingListEnd
+
+%-----------PROJECTS-----------
+\section{Projects}
+    \resumeSubHeadingListStart
+    
+      \resumeProjectHeading
+          {\textbf{RISC-V CPU Simulation Environment} $|$ \emph{C, Python, Make, Shell}}{2024}
+          \resumeItemListStart
+            \resumeItem{Built low-level \textbf{C/Python simulator} for RISC-V architecture implementing fetch-decode-execute pipeline, memory management, and instruction-level debugging tools with automated test infrastructure.}
+          \resumeItemListEnd
+          
+      \resumeProjectHeading
+          {\textbf{Theta Tau Chapter Website} $|$ \emph{Next.js, TypeScript, TailwindCSS, Express.js, Supabase}}{2024 -- Present}
+          \resumeItemListStart
+            \resumeItem{Built and deployed \textbf{full-stack chapter website} (\href{https://www.sjsuthetatau.org/}{\underline{sjsuthetatau.org}}) with role-based authentication, event management APIs, and CI/CD pipeline (GitHub Actions → Vercel) with automated database migrations. \href{https://github.com/Theta-Tau-SJSU-Software/sjsuttwebsite}{\underline{[GitHub]}}}
+          \resumeItemListEnd
+          
+      \resumeProjectHeading
+          {\textbf{Retain -- AI Lecture Generation Platform} $|$ \emph{Flask, Node.js, PostgreSQL, Pinecone, AWS S3, Docker}}{2025}
+          \resumeItemListStart
+            \resumeItem{Designed \textbf{microservices backend} with RAG pipeline (Pinecone vector DB + GPT-4) for personalized content generation, handling user auth and containerized deployment.}
+          \resumeItemListEnd
+          
+    \resumeSubHeadingListEnd
+
+%-----------TECHNICAL SKILLS-----------
+\section{Technical Skills}
+ \begin{itemize}[leftmargin=0.15in, label={}]
+    \small{\item{
+     \textbf{Languages}{: C, C++, Python, x86/MIPS Assembly, TypeScript/JavaScript, Kotlin, Java, Verilog} \\
+     \textbf{Embedded/Systems}{: STM32, Real-Time Systems, RTOS Concepts, Device Drivers, Protocol Implementation (CAN, SPI, I2C, BLE), MEMS IMUs, Sensor Fusion} \\
+     \textbf{Tools \& Testing}{: Git, CMake, Make, HIL Testing, Docker, Oscilloscope, Logic Analyzer} \\
+     \textbf{Development}{: Linux, GitHub Actions, Gradle, Android NDK/JNI} \\
+     \textbf{ML/Data}{: TensorFlow, TFLite, PyTorch, ONNX, InfluxDB, Grafana, PostgreSQL}
+    }}
+ \end{itemize}
+
+%-------------------------------------------
+\end{document}
